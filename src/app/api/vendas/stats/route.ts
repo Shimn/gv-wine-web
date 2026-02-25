@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const { data: vendas, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    type VendaItem = { id?: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: { id: number; nome?: string } | { id: number; nome?: string }[] | null };
+    type VendaItem = { id?: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: Record<string, unknown> | null };
     type VendaRow = { id: number; data_venda?: string; valor_final?: number; forma_pagamento?: string; status?: string; itens_venda?: VendaItem[] };
     const lista = (vendas ?? []) as unknown as VendaRow[];
 
@@ -47,9 +47,10 @@ export async function GET(req: NextRequest) {
     // Top vinhos por receita
     const vinhoMap: Record<string, { nome: string; qtd: number; receita: number }> = {};
     concluidas.forEach((v) => {
-      (v.itens_venda ?? []).forEach((item: VendaItem) => {
-        const id = String(item.vinhos?.id ?? '?');
-        if (!vinhoMap[id]) vinhoMap[id] = { nome: item.vinhos?.nome ?? '?', qtd: 0, receita: 0 };
+      (v.itens_venda ?? []).forEach((item) => {
+        const w = Array.isArray(item.vinhos) ? item.vinhos[0] : item.vinhos;
+        const id = String(w?.id ?? '?');
+        if (!vinhoMap[id]) vinhoMap[id] = { nome: String(w?.nome ?? '?'), qtd: 0, receita: 0 };
         vinhoMap[id].qtd     += item.quantidade ?? 0;
         vinhoMap[id].receita += item.subtotal ?? 0;
       });
