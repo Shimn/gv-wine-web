@@ -32,10 +32,20 @@ const config: Config = {
           '0%, 80%, 100%': { transform: 'scale(0)', opacity: '0.3' },
           '40%':           { transform: 'scale(1)', opacity: '1' },
         },
+        slideUp: {
+          '0%':   { opacity: '0', transform: 'translateY(100%)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideLeft: {
+          '0%':   { opacity: '0', transform: 'translateX(100%)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
       },
       animation: {
         fadeSlideUp: 'fadeSlideUp 0.25s ease-out',
         dotBounce:   'dotBounce 1.4s infinite ease-in-out both',
+        slideUp:     'slideUp 0.3s cubic-bezier(0.32,0.72,0,1)',
+        slideLeft:   'slideLeft 0.3s cubic-bezier(0.32,0.72,0,1)',
       },
     },
   },
