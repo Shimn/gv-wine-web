@@ -8,6 +8,7 @@ const NAV = [
   { href: '/estoque',       label: 'Estoque',  icon: '📦' },
   { href: '/vendas',        label: 'Vendas',   icon: '💰' },
   { href: '/movimentacoes', label: 'Histórico',icon: '📋' },
+  { href: '/ajuda',         label: 'Ajuda',    icon: '❓' },
 ];
 
 export default function MobileNav() {
