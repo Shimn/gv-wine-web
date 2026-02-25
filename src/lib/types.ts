@@ -145,6 +145,7 @@ export interface Cafe {
   nome: string;
   tipo_grao?: string;
   torra?: string;
+  formato?: string;
   origem?: string;
   peso_g?: number;
   preco_custo?: number;

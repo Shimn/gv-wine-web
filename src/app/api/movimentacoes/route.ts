@@ -60,3 +60,18 @@ export async function GET() {
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
   }
 }
+
+// DELETE /api/movimentacoes — limpa todo o histórico (dev only)
+export async function DELETE() {
+  try {
+    const { error: errV } = await supabase.from('movimentacoes_estoque').delete().neq('id', 0);
+    if (errV) return NextResponse.json({ error: errV.message }, { status: 500 });
+
+    const { error: errC } = await supabase.from('movimentacoes_estoque_cafe').delete().neq('id', 0);
+    if (errC) return NextResponse.json({ error: errC.message }, { status: 500 });
+
+    return NextResponse.json({ message: 'Histórico de movimentações limpo.' });
+  } catch {
+    return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
+  }
+}

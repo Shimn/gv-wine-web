@@ -100,6 +100,8 @@ export default function VendasPage() {
   const [loadingVendas, setLoadingVendas] = useState(true);
   const [loadingStats,  setLoadingStats]  = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const { from, to } = useMemo(() => {
     if (period === "custom") return { from: customFrom, to: customTo };
@@ -127,6 +129,19 @@ export default function VendasPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  async function handleClearVendas() {
+    setClearing(true);
+    try {
+      const r = await fetch('/api/vendas', { method: 'DELETE' });
+      if (r.ok) {
+        fetchData();
+        setConfirmClear(false);
+      }
+    } finally {
+      setClearing(false);
+    }
+  }
+
   // Barras do gráfico
   const chartData = useMemo(() => {
     if (!stats?.porDia) return [];
@@ -152,6 +167,33 @@ export default function VendasPage() {
       <div className="bg-white border-b border-gray-100 px-4 py-3 shrink-0">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <h1 className="text-lg font-bold text-gray-900">💰 Vendas</h1>
+
+          {/* Dev: limpar vendas */}
+          {!confirmClear ? (
+            <button
+              onClick={() => setConfirmClear(true)}
+              className="text-[10px] text-red-400 hover:text-red-600 border border-red-200 rounded-full px-2 py-0.5 transition-colors"
+              title="Limpar todas as vendas (dev)"
+            >
+              🗑️ Limpar
+            </button>
+          ) : (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="text-[10px] text-gray-400 border border-gray-200 rounded-full px-2 py-0.5 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleClearVendas}
+                disabled={clearing}
+                className="text-[10px] text-white bg-red-600 rounded-full px-2 py-0.5 hover:bg-red-700 disabled:opacity-50"
+              >
+                {clearing ? 'Limpando…' : 'Confirmar'}
+              </button>
+            </div>
+          )}
 
           {/* Filtro de período */}
           <div className="flex items-center gap-1 flex-wrap">

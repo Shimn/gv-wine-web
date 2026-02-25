@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS cafes (
   nome TEXT NOT NULL,
   tipo_grao TEXT,               -- Arábica, Robusta, Blend
   torra TEXT,                   -- Clara, Média, Média-Escura, Escura
+  formato TEXT CHECK (formato IN ('capsula', 'grao', 'moido')),  -- Cápsula, Grão inteiro, Moído
   origem TEXT,                  -- Brasil, Colômbia, Etiópia, etc
   peso_g INTEGER DEFAULT 250,   -- Peso em gramas (250g padrão)
   preco_custo DECIMAL(10,2),

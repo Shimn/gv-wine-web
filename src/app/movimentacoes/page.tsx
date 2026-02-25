@@ -28,14 +28,32 @@ export default function MovimentacoesPage() {
   const [error, setError]     = useState('');
   const [filter, setFilter]   = useState('todos');
   const [produtoFilter, setProdutoFilter] = useState<'todos' | 'vinho' | 'cafe'>('todos');
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
+  function fetchMovs() {
+    setLoading(true);
     fetch('/api/movimentacoes')
       .then((r) => r.json())
       .then((d) => setMovs(d.movimentacoes ?? []))
       .catch(() => setError('Erro ao carregar histórico.'))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { fetchMovs(); }, []);
+
+  async function handleClearMovs() {
+    setClearing(true);
+    try {
+      const r = await fetch('/api/movimentacoes', { method: 'DELETE' });
+      if (r.ok) {
+        fetchMovs();
+        setConfirmClear(false);
+      }
+    } finally {
+      setClearing(false);
+    }
+  }
 
   const filtered = movs
     .filter((m) => filter === 'todos' || m.tipo === filter)
@@ -45,7 +63,36 @@ export default function MovimentacoesPage() {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-4 shrink-0">
-        <h1 className="text-lg font-bold text-gray-900">📋 Histórico de Movimentações</h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-lg font-bold text-gray-900">📋 Histórico de Movimentações</h1>
+
+          {/* Dev: limpar histórico */}
+          {!confirmClear ? (
+            <button
+              onClick={() => setConfirmClear(true)}
+              className="text-[10px] text-red-400 hover:text-red-600 border border-red-200 rounded-full px-2 py-0.5 transition-colors shrink-0"
+              title="Limpar todo o histórico (dev)"
+            >
+              🗑️ Limpar
+            </button>
+          ) : (
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="text-[10px] text-gray-400 border border-gray-200 rounded-full px-2 py-0.5 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleClearMovs}
+                disabled={clearing}
+                className="text-[10px] text-white bg-red-600 rounded-full px-2 py-0.5 hover:bg-red-700 disabled:opacity-50"
+              >
+                {clearing ? 'Limpando…' : 'Confirmar'}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Filter buttons */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1">

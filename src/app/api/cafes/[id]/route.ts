@@ -9,7 +9,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const { id } = await params;
     const body = await req.json();
     const {
-      nome, tipo_grao, torra, origem, peso_g,
+      nome, tipo_grao, torra, formato, origem, peso_g,
       preco_custo, preco_venda, descricao, notas_degustacao,
     } = body;
 
@@ -23,6 +23,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         nome,
         tipo_grao: tipo_grao || null,
         torra: torra || null,
+        formato: formato || null,
         origem: origem || null,
         peso_g: peso_g || 250,
         preco_custo: preco_custo || null,

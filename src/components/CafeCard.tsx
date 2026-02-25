@@ -38,6 +38,7 @@ export default function CafeCard({ cafe, onClick }: CafeCardProps) {
           <p className="text-xs text-gray-500 mt-0.5">
             {cafe.origem ?? '--'}
             {cafe.torra ? ` · Torra ${cafe.torra}` : ''}
+            {cafe.formato ? ` · ${cafe.formato === 'capsula' ? 'Cápsula' : cafe.formato === 'grao' ? 'Grão inteiro' : 'Moído'}` : ''}
           </p>
         </div>
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${statusColor}`}>

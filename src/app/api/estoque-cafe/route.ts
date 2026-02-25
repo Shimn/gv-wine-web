@@ -7,7 +7,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('cafes')
       .select(`
-        id, nome, tipo_grao, torra, origem, peso_g,
+        id, nome, tipo_grao, torra, formato, origem, peso_g,
         preco_custo, preco_venda, descricao, notas_degustacao,
         estoque_cafe(quantidade, localizacao)
       `)

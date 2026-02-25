@@ -259,6 +259,7 @@ function TabEditar({
     nome: cafe?.nome ?? '',
     tipo_grao: cafe?.tipo_grao ?? '',
     torra: cafe?.torra ?? '',
+    formato: cafe?.formato ?? '',
     origem: cafe?.origem ?? '',
     peso_g: String(cafe?.peso_g ?? '250'),
     preco_custo: String(cafe?.preco_custo ?? ''),
@@ -269,10 +270,27 @@ function TabEditar({
   });
 
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
   function set(field: string, val: string) {
     setForm((f) => ({ ...f, [field]: val }));
+  }
+
+  async function handleDelete() {
+    if (!cafe) return;
+    setDeleting(true);
+    setMsg(null);
+    try {
+      const r = await fetch(`/api/cafes/${cafe.id}`, { method: 'DELETE' });
+      if (!r.ok) { const d = await r.json(); setMsg({ type: 'err', text: d.error ?? 'Erro ao excluir.' }); return; }
+      onSuccess();
+      onClose();
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
   }
 
   async function submit() {
@@ -284,6 +302,7 @@ function TabEditar({
       nome: form.nome.trim(),
       tipo_grao: form.tipo_grao || null,
       torra: form.torra || null,
+      formato: form.formato || null,
       origem: form.origem || null,
       peso_g: form.peso_g ? Number(form.peso_g) : 250,
       preco_custo: form.preco_custo ? Number(form.preco_custo) : null,
@@ -343,6 +362,17 @@ function TabEditar({
         </div>
       </div>
 
+      {/* Formato */}
+      <div>
+        <label className={labelCls}>Formato</label>
+        <select value={form.formato} onChange={(e) => set('formato', e.target.value)} className={inputCls}>
+          <option value="">Selecione...</option>
+          <option value="capsula">Cápsula</option>
+          <option value="grao">Grão inteiro</option>
+          <option value="moido">Moído</option>
+        </select>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls}>Origem</label>
@@ -398,6 +428,39 @@ function TabEditar({
           {loading ? 'Salvando…' : isNew ? 'Cadastrar café' : 'Salvar alterações'}
         </button>
       </div>
+
+      {/* Botão excluir — só no modo edição */}
+      {!isNew && cafe && (
+        <div className="pt-3 border-t border-gray-100">
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="w-full text-xs text-red-400 hover:text-red-600 transition-colors py-2"
+            >
+              🗑️ Excluir este café
+            </button>
+          ) : (
+            <div className="bg-red-50 rounded-xl p-3 space-y-2">
+              <p className="text-xs text-red-700 font-medium">Tem certeza? Esta ação é irreversível.</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="flex-1 border border-gray-200 text-gray-500 rounded-lg py-2 text-xs hover:bg-white transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 bg-red-600 text-white rounded-lg py-2 text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleting ? 'Excluindo…' : 'Confirmar exclusão'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -504,6 +567,7 @@ export default function CoffeePanel({ cafe, mode, onClose, onSuccess }: CoffeePa
                   { label: 'Preço venda', value: fmtBRL(cafe.preco_venda), highlight: true },
                   { label: 'Tipo de grão', value: cafe.tipo_grao ?? '—' },
                   { label: 'Torra', value: cafe.torra ?? '—' },
+                  { label: 'Formato', value: cafe.formato === 'capsula' ? 'Cápsula' : cafe.formato === 'grao' ? 'Grão inteiro' : cafe.formato === 'moido' ? 'Moído' : '—' },
                   { label: 'Origem', value: cafe.origem ?? '—' },
                 ].map((item) => (
                   <div key={item.label} className="bg-gray-50 rounded-xl p-3">

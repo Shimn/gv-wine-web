@@ -36,3 +36,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
   }
 }
+
+// DELETE /api/vendas — limpa todas as vendas (dev only)
+export async function DELETE() {
+  try {
+    // Primeiro remove itens_venda (FK)
+    const { error: errItens } = await supabase.from('itens_venda').delete().neq('id', 0);
+    if (errItens) return NextResponse.json({ error: errItens.message }, { status: 500 });
+
+    const { error } = await supabase.from('vendas').delete().neq('id', 0);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ message: 'Todas as vendas foram removidas.' });
+  } catch {
+    return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
+  }
+}

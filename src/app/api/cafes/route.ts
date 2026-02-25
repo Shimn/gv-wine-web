@@ -7,7 +7,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('cafes')
       .select(`
-        id, nome, tipo_grao, torra, origem, peso_g,
+        id, nome, tipo_grao, torra, formato, origem, peso_g,
         preco_custo, preco_venda, descricao, notas_degustacao,
         estoque_cafe(quantidade, localizacao)
       `)
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      nome, tipo_grao, torra, origem, peso_g,
+      nome, tipo_grao, torra, formato, origem, peso_g,
       preco_custo, preco_venda, descricao, notas_degustacao,
       estoque_inicial = 0,
       localizacao,
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
         nome,
         tipo_grao: tipo_grao || null,
         torra: torra || null,
+        formato: formato || null,
         origem: origem || null,
         peso_g: peso_g || 250,
         preco_custo: preco_custo || null,
