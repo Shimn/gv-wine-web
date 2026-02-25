@@ -62,14 +62,14 @@ export default function EstoquePage() {
   }
 
   const categoriasLista = ['Todas', ...Array.from(new Set(
-    vinhos.map((v) => (v.categorias as any)?.nome).filter(Boolean)
+    vinhos.map((v) => v.categorias?.nome).filter(Boolean)
   ))];
 
   const filtered = vinhos.filter((v) => {
     const matchSearch =
       v.nome.toLowerCase().includes(search.toLowerCase()) ||
-      (v.produtores as any)?.nome?.toLowerCase().includes(search.toLowerCase());
-    const matchCat = category === 'Todas' || (v.categorias as any)?.nome === category;
+      v.produtores?.nome?.toLowerCase().includes(search.toLowerCase());
+    const matchCat = category === 'Todas' || v.categorias?.nome === category;
     return matchSearch && matchCat;
   });
 

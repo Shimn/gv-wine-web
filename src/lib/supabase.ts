@@ -18,7 +18,7 @@ export function getSupabase(): SupabaseClient {
 
 // Alias para compatibilidade com o código que usa `supabase.from(...)`
 export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    return (getSupabase() as any)[prop];
+  get(_target, prop: string | symbol) {
+    return (getSupabase() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });

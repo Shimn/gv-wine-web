@@ -23,15 +23,15 @@ export async function GET(req: NextRequest) {
       .order('data_venda', { ascending: false })
       .limit(200);
 
-    if (from)   query = (query as any).gte('data_venda', from);
-    if (to)     query = (query as any).lte('data_venda', to + 'T23:59:59');
-    if (status && status !== 'todos') query = (query as any).eq('status', status);
+    if (from)   query = query.gte('data_venda', from);
+    if (to)     query = query.lte('data_venda', to + 'T23:59:59');
+    if (status && status !== 'todos') query = query.eq('status', status);
 
     const { data, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     return NextResponse.json({ vendas: data ?? [] });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
   }
 }

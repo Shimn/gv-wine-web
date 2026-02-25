@@ -67,8 +67,8 @@ export interface Vinho {
   created_at?: string;
   updated_at?: string;
   // Joins
-  produtores?: { nome: string; contato?: string };
-  categorias?: { nome: string };
+  produtores?: { id?: number; nome: string; contato?: string } | null;
+  categorias?: { id?: number; nome: string } | null;
   estoque?: Estoque[];
 }
 

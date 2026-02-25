@@ -143,7 +143,7 @@ export default function ChatPage() {
           </button>
         </div>
         <p className="text-center text-xs text-gray-400 mt-1.5">
-          Shift+Enter para nova linha · Powered by Groq Llama 3.3 70B
+          <span className="hidden sm:inline">Shift+Enter para nova linha · </span>Powered by Groq Llama 3.3 70B
         </p>
       </div>
     </div>

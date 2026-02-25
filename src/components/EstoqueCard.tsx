@@ -36,7 +36,7 @@ export default function EstoqueCard({ vinho, onClick }: EstoqueCardProps) {
             {vinho.nome}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            {(vinho.produtores as any)?.nome ?? '--'}
+            {vinho.produtores?.nome ?? '--'}
             {vinho.safra ? ` · Safra ${vinho.safra}` : ''}
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function EstoqueCard({ vinho, onClick }: EstoqueCardProps) {
       {/* Categoria + volume + estoque */}
       <div className="mt-3 flex items-center justify-between">
         <div className="flex gap-3 text-xs text-gray-500">
-          <span>{(vinho.categorias as any)?.nome ?? '--'}</span>
+          <span>{vinho.categorias?.nome ?? '--'}</span>
           <span>{vinho.volume_ml ?? 750} ml</span>
         </div>
         <div className="text-right">

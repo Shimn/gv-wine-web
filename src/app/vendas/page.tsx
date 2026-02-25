@@ -172,12 +172,12 @@ export default function VendasPage() {
 
         {/* Datas personalizadas */}
         {period === "custom" && (
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-wine-400" />
+              className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-wine-400" />
             <span className="text-xs text-gray-400">até</span>
             <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-wine-400" />
+              className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-wine-400" />
           </div>
         )}
       </div>
@@ -287,14 +287,14 @@ export default function VendasPage() {
         {/* ── Lista de Vendas ─── */}
         <div className="bg-white rounded-xl border border-gray-100">
           {/* Header da lista com filtro de status */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3 border-b border-gray-50">
             <p className="text-sm font-semibold text-gray-700">Detalhes das vendas</p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 overflow-x-auto scrollbar-none">
               {["todos", "concluida", "pendente", "cancelada"].map((s) => (
                 <button
                   key={s}
                   onClick={() => setStatusFilter(s)}
-                  className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+                  className={`shrink-0 text-xs px-2 py-1 rounded-full border transition-colors ${
                     statusFilter === s
                       ? "bg-wine-700 text-white border-wine-700"
                       : "bg-white text-gray-400 border-gray-200 hover:border-wine-300"
@@ -355,12 +355,13 @@ export default function VendasPage() {
                       <p className="text-xs text-gray-500 font-medium py-2">Itens da venda:</p>
                       <div className="space-y-1">
                         {venda.itens_venda.map((item) => (
-                          <div key={item.id} className="flex items-center justify-between text-xs">
-                            <span className="text-gray-700">
+                          <div key={item.id} className="flex items-start justify-between gap-2 text-xs">
+                            <span className="text-gray-700 flex-1 min-w-0">
                               {item.quantidade}x {item.vinhos?.nome ?? "Vinho"}{item.vinhos?.safra ? ` (${item.vinhos.safra})` : ""}
                             </span>
-                            <span className="text-gray-500">
-                              {fmtBRL(item.preco_unitario)} ea · <span className="font-medium text-gray-700">{fmtBRL(item.subtotal)}</span>
+                            <span className="text-gray-500 shrink-0 text-right">
+                              {fmtBRL(item.preco_unitario)} ×{item.quantidade}<br />
+                              <span className="font-medium text-gray-700">{fmtBRL(item.subtotal)}</span>
                             </span>
                           </div>
                         ))}

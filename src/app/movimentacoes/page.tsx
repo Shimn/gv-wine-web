@@ -65,7 +65,7 @@ export default function MovimentacoesPage() {
         <div className="space-y-2">
           {filtered.map((mov) => {
             const cfg   = TIPO_CONFIG[mov.tipo] ?? TIPO_CONFIG.ajuste;
-            const vinho = (mov.vinhos as any);
+            const vinho = mov.vinhos;
             const data  = new Date(mov.created_at).toLocaleDateString('pt-BR', {
               day: '2-digit', month: '2-digit', year: 'numeric',
               hour: '2-digit', minute: '2-digit',

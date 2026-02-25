@@ -1,11 +1,29 @@
 import { supabase } from './supabase';
 import { chat } from './ai';
-import type { Vinho } from './types';
 
 // ============================================
 // Agent – mesma lógica do agentService.ts do bot
 // Adaptado para Next.js API routes (server-side)
 // ============================================
+
+// Local types for agent queries
+type VinhoQuery = {
+  id: number;
+  nome: string;
+  safra?: number;
+  tipo_uva?: string;
+  teor_alcoolico?: number;
+  preco_venda?: number;
+  descricao?: string;
+  notas_degustacao?: string;
+  produtores?: { nome?: string } | null;
+  categorias?: { nome?: string } | null;
+  estoque?: { quantidade: number; localizacao?: string }[];
+};
+
+type CategoriaRow = { id: number; nome: string };
+type ProdutorRow = { id: number; nome: string };
+type VinhoInsert = { nome: string; categoria_id: number; preco_venda: number; produtor_id?: number; safra?: number };
 
 type ActionType =
   | 'estoque'
@@ -93,7 +111,8 @@ async function handleEstoque(userMessage: string): Promise<string> {
   let totalVinhos = 0;
   let totalUnidades = 0;
 
-  estoque.forEach((v: any) => {
+  type EstoqueRow = { id: number; nome: string; safra?: number; preco_venda?: number; produtores?: { nome?: string } | null; categorias?: { nome?: string } | null; estoque?: { quantidade: number }[] };
+  (estoque as EstoqueRow[]).forEach((v) => {
     const qtd = v.estoque?.[0]?.quantidade ?? 0;
     totalUnidades += qtd;
     if (qtd > 0) totalVinhos++;
@@ -126,14 +145,14 @@ async function handleVinhoDetalhes(busca: string, userMessage: string): Promise<
 
   if (vinhos.length > 1) {
     let lista = `🔍 Encontrei ${vinhos.length} vinhos:\n\n`;
-    vinhos.forEach((v: any) => {
+    (vinhos as VinhoQuery[]).forEach((v) => {
       const qtd = v.estoque?.[0]?.quantidade ?? 0;
       lista += `- ID ${v.id}: ${v.nome} (${qtd} unidades)\n`;
     });
     return lista + '\n💡 Seja mais específico ou use o ID do vinho.';
   }
 
-  const v: any = vinhos[0];
+  const v = vinhos[0] as VinhoQuery;
   const qtd      = v.estoque?.[0]?.quantidade ?? 0;
   const produtor  = v.produtores?.nome ?? 'N/A';
   const categoria = v.categorias?.nome ?? 'N/A';
@@ -153,31 +172,31 @@ async function handleAdicionarVinho(params: Record<string, string>): Promise<str
   }
 
   // Categoria
-  let categoria: any;
+  let categoria: CategoriaRow | null = null;
   const { data: catExist } = await supabase.from('categorias').select('*').eq('nome', categoriaNome).single();
   if (catExist) {
-    categoria = catExist;
+    categoria = catExist as CategoriaRow;
   } else {
     const { data: newCat, error } = await supabase.from('categorias').insert([{ nome: categoriaNome }]).select().single();
     if (error) return `❌ Erro ao criar categoria: ${error.message}`;
-    categoria = newCat;
+    categoria = newCat as CategoriaRow;
   }
 
   // Produtor (opcional)
-  let produtor: any = null;
+  let produtor: ProdutorRow | null = null;
   if (produtorNome) {
     const { data: prodExist } = await supabase.from('produtores').select('*').eq('nome', produtorNome).single();
     if (prodExist) {
-      produtor = prodExist;
+      produtor = prodExist as ProdutorRow;
     } else {
       const { data: newProd, error } = await supabase.from('produtores').insert([{ nome: produtorNome }]).select().single();
       if (error) return `❌ Erro ao criar produtor: ${error.message}`;
-      produtor = newProd;
+      produtor = newProd as ProdutorRow;
     }
   }
 
   // Vinho
-  const vinhoData: any = { nome, categoria_id: categoria.id, preco_venda: parseFloat(preco) };
+  const vinhoData: VinhoInsert = { nome, categoria_id: categoria!.id, preco_venda: parseFloat(preco) };
   if (produtor) vinhoData.produtor_id = produtor.id;
   if (safra)    vinhoData.safra = parseInt(safra);
 
@@ -207,7 +226,7 @@ async function handleRetirarVinho(params: Record<string, string>): Promise<strin
   if (!vinhos) return `❌ Não encontrei o vinho "${vinhoNome}".`;
   if (vinhos.length > 1) return formatarListaVinhos(vinhos, 'Encontrei múltiplos vinhos. Use o ID específico.');
 
-  const v: any = vinhos[0];
+  const v = vinhos[0];
   const estoqueAtual = v.estoque?.[0]?.quantidade ?? 0;
 
   if (estoqueAtual < qtdRetirar) {
@@ -240,7 +259,7 @@ async function handleAjustarEstoque(params: Record<string, string>): Promise<str
   if (!vinhos) return `❌ Não encontrei o vinho "${vinhoNome}".`;
   if (vinhos.length > 1) return formatarListaVinhos(vinhos, 'Encontrei múltiplos vinhos. Use o ID específico.');
 
-  const v: any = vinhos[0];
+  const v = vinhos[0];
   const estoqueAtual = v.estoque?.[0]?.quantidade ?? 0;
   const novaQtd = estoqueAtual + qtdAdicionar;
 
@@ -310,7 +329,7 @@ async function handleConversa(message: string): Promise<string> {
 
 // -------------------------------------------------
 // Helpers
-async function buscarVinho(busca: string): Promise<any[] | null> {
+async function buscarVinho(busca: string): Promise<VinhoQuery[] | null> {
   const isId = !isNaN(Number(busca));
   let query = supabase
     .from('vinhos')
@@ -320,10 +339,10 @@ async function buscarVinho(busca: string): Promise<any[] | null> {
 
   const { data, error } = await query;
   if (error || !data || data.length === 0) return null;
-  return data;
+  return data as VinhoQuery[];
 }
 
-function formatarListaVinhos(vinhos: any[], note: string): string {
+function formatarListaVinhos(vinhos: VinhoQuery[], note: string): string {
   let lista = `🔍 ${note}\n\n`;
   vinhos.forEach((v) => {
     const qtd = v.estoque?.[0]?.quantidade ?? 0;

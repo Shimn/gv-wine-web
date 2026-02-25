@@ -271,8 +271,8 @@ function TabEditar({
     preco_venda: String(vinho?.preco_venda ?? ''),
     descricao: vinho?.descricao ?? '',
     notas_degustacao: vinho?.notas_degustacao ?? '',
-    produtor_id: String((vinho?.produtores as any)?.id ?? vinho?.produtor_id ?? ''),
-    categoria_id: String((vinho?.categorias as any)?.id ?? vinho?.categoria_id ?? ''),
+    produtor_id: String(vinho?.produtores?.id ?? vinho?.produtor_id ?? ''),
+    categoria_id: String(vinho?.categorias?.id ?? vinho?.categoria_id ?? ''),
     estoque_inicial: '0',
   });
 
@@ -471,7 +471,7 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
                   <p className="text-xs text-wine-400">#{vinho!.id}</p>
                   <h2 className="text-lg font-bold text-wine-900 leading-tight">{vinho!.nome}</h2>
                   <p className="text-xs text-wine-600 mt-0.5">
-                    {(vinho!.produtores as any)?.nome ?? '—'}
+                    {vinho!.produtores?.nome ?? '—'}
                     {vinho!.safra ? ` · ${vinho!.safra}` : ''}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
@@ -491,12 +491,12 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 -mb-px">
+          <div className="flex gap-1 -mb-px overflow-x-auto scrollbar-none">
             {visibleTabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-t-lg border-x border-t transition-colors ${
+                className={`flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-t-lg border-x border-t transition-colors shrink-0 ${
                   activeTab === tab.key
                     ? 'bg-white border-wine-100 text-wine-800 z-10'
                     : 'bg-transparent border-transparent text-wine-500 hover:text-wine-700'
@@ -520,7 +520,7 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
                   { label: 'Volume', value: `${vinho.volume_ml ?? 750} ml` },
                   { label: 'Preço custo', value: vinho.preco_custo ? fmtBRL(vinho.preco_custo) : '—' },
                   { label: 'Preço venda', value: fmtBRL(vinho.preco_venda), highlight: true },
-                  { label: 'Categoria', value: (vinho.categorias as any)?.nome ?? '—' },
+                  { label: 'Categoria', value: vinho.categorias?.nome ?? '—' },
                   { label: 'Tipo de uva', value: vinho.tipo_uva ?? '—' },
                   { label: 'Safra', value: vinho.safra ? String(vinho.safra) : '—' },
                   { label: 'Teor alcoólico', value: vinho.teor_alcoolico ? `${vinho.teor_alcoolico}%` : '—' },
