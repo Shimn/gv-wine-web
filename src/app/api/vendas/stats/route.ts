@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('vendas')
-      .select('id, data_venda, valor_final, forma_pagamento, status, itens_venda(quantidade, preco_unitario, subtotal, vinhos(id, nome))')
+      .select('id, data_venda, valor_final, forma_pagamento, status, itens_venda(quantidade, preco_unitario, subtotal, vinhos(id, nome), cafes(id, nome))')
       .order('data_venda', { ascending: true });
 
     if (from) query = query.gte('data_venda', from);
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const { data: vendas, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    type VendaItem = { id?: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: Record<string, unknown> | null };
+    type VendaItem = { id?: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: Record<string, unknown> | null; cafes?: Record<string, unknown> | null };
     type VendaRow = { id: number; data_venda?: string; valor_final?: number; forma_pagamento?: string; status?: string; itens_venda?: VendaItem[] };
     const lista = (vendas ?? []) as unknown as VendaRow[];
 
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     const vinhoMap: Record<string, { nome: string; qtd: number; receita: number }> = {};
     concluidas.forEach((v) => {
       (v.itens_venda ?? []).forEach((item) => {
+        if (!item.vinhos) return;
         const w = Array.isArray(item.vinhos) ? item.vinhos[0] : item.vinhos;
         const id = String(w?.id ?? '?');
         if (!vinhoMap[id]) vinhoMap[id] = { nome: String(w?.nome ?? '?'), qtd: 0, receita: 0 };
@@ -56,6 +57,22 @@ export async function GET(req: NextRequest) {
       });
     });
     const topVinhos = Object.values(vinhoMap)
+      .sort((a, b) => b.receita - a.receita)
+      .slice(0, 5);
+
+    // Top cafés por receita
+    const cafeMap: Record<string, { nome: string; qtd: number; receita: number }> = {};
+    concluidas.forEach((v) => {
+      (v.itens_venda ?? []).forEach((item) => {
+        if (!item.cafes) return;
+        const c = Array.isArray(item.cafes) ? item.cafes[0] : item.cafes;
+        const id = String(c?.id ?? '?');
+        if (!cafeMap[id]) cafeMap[id] = { nome: String(c?.nome ?? '?'), qtd: 0, receita: 0 };
+        cafeMap[id].qtd     += item.quantidade ?? 0;
+        cafeMap[id].receita += item.subtotal ?? 0;
+      });
+    });
+    const topCafes = Object.values(cafeMap)
       .sort((a, b) => b.receita - a.receita)
       .slice(0, 5);
 
@@ -69,6 +86,7 @@ export async function GET(req: NextRequest) {
       porDia,
       porPagamento,
       topVinhos,
+      topCafes,
     });
   } catch {
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });

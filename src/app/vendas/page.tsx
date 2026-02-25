@@ -15,7 +15,7 @@ interface Venda {
   status: string;
   observacoes?: string;
   clientes?: { id: number; nome: string };
-  itens_venda?: { id: number; quantidade: number; preco_unitario: number; subtotal: number; vinhos?: { id: number; nome: string; safra?: number } }[];
+  itens_venda?: { id: number; quantidade: number; preco_unitario: number; subtotal: number; vinhos?: { id: number; nome: string; safra?: number }; cafes?: { id: number; nome: string } }[];
 }
 
 interface Stats {
@@ -28,6 +28,7 @@ interface Stats {
   porDia: Record<string, number>;
   porPagamento: Record<string, { count: number; total: number }>;
   topVinhos: { nome: string; qtd: number; receita: number }[];
+  topCafes: { nome: string; qtd: number; receita: number }[];
 }
 
 // ----------------------------------------------------------------
@@ -282,6 +283,32 @@ export default function VendasPage() {
               </div>
             </div>
           )}
+
+          {/* Top cafés */}
+          {stats && stats.topCafes && stats.topCafes.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-100 p-4">
+              <p className="text-sm font-semibold text-gray-700 mb-3">☕ Top cafés (por receita)</p>
+              <div className="space-y-2">
+                {stats.topCafes.map((c, i) => {
+                  const maxReceita = stats.topCafes[0]?.receita || 1;
+                  return (
+                    <div key={c.nome}>
+                      <div className="flex items-center justify-between text-xs mb-0.5">
+                        <span className="text-gray-600 truncate flex-1">
+                          <span className="text-gray-400 mr-1">{i + 1}.</span>{c.nome}
+                        </span>
+                        <span className="font-semibold text-gray-700 shrink-0 ml-2">{fmtBRL(c.receita)}</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full">
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: Math.round((c.receita / maxReceita) * 100) + "%" }} />
+                      </div>
+                      <p className="text-[10px] text-gray-400">{c.qtd} unidades vendidas</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Lista de Vendas ─── */}
@@ -357,7 +384,8 @@ export default function VendasPage() {
                         {venda.itens_venda.map((item) => (
                           <div key={item.id} className="flex items-start justify-between gap-2 text-xs">
                             <span className="text-gray-700 flex-1 min-w-0">
-                              {item.quantidade}x {item.vinhos?.nome ?? "Vinho"}{item.vinhos?.safra ? ` (${item.vinhos.safra})` : ""}
+                              {item.quantidade}x {item.vinhos?.nome ?? item.cafes?.nome ?? 'Produto'}{item.vinhos?.safra ? ` (${item.vinhos.safra})` : ''}
+                              {item.cafes && <span className="text-amber-500 ml-1 text-[10px]">☕</span>}
                             </span>
                             <span className="text-gray-500 shrink-0 text-right">
                               {fmtBRL(item.preco_unitario)} ×{item.quantidade}<br />

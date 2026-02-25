@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
         clientes(id, nome),
         itens_venda(
           id, quantidade, preco_unitario, subtotal,
-          vinhos(id, nome, safra)
+          vinhos(id, nome, safra),
+          cafes(id, nome)
         )
       `)
       .order('data_venda', { ascending: false })

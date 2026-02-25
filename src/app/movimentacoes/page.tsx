@@ -1,7 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { MovimentacaoEstoque } from '@/lib/types';
+
+interface Movimentacao {
+  id: number;
+  tipo: 'entrada' | 'saida' | 'ajuste' | 'perda';
+  quantidade: number;
+  quantidade_anterior?: number;
+  quantidade_nova?: number;
+  motivo?: string;
+  created_at: string;
+  produto_tipo: 'vinho' | 'cafe';
+  vinhos?: { id: number; nome: string };
+  cafes?: { id: number; nome: string };
+}
 
 const TIPO_CONFIG: Record<string, { icon: string; label: string; color: string }> = {
   entrada: { icon: '📥', label: 'Entrada',  color: 'text-green-600 bg-green-50' },
@@ -11,10 +23,11 @@ const TIPO_CONFIG: Record<string, { icon: string; label: string; color: string }
 };
 
 export default function MovimentacoesPage() {
-  const [movs, setMovs]       = useState<MovimentacaoEstoque[]>([]);
+  const [movs, setMovs]       = useState<Movimentacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
   const [filter, setFilter]   = useState('todos');
+  const [produtoFilter, setProdutoFilter] = useState<'todos' | 'vinho' | 'cafe'>('todos');
 
   useEffect(() => {
     fetch('/api/movimentacoes')
@@ -24,7 +37,9 @@ export default function MovimentacoesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filter === 'todos' ? movs : movs.filter((m) => m.tipo === filter);
+  const filtered = movs
+    .filter((m) => filter === 'todos' || m.tipo === filter)
+    .filter((m) => produtoFilter === 'todos' || m.produto_tipo === produtoFilter);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -48,6 +63,23 @@ export default function MovimentacoesPage() {
             </button>
           ))}
         </div>
+
+        {/* Filtro por produto */}
+        <div className="flex gap-2 mt-2">
+          {(['todos', 'vinho', 'cafe'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setProdutoFilter(p)}
+              className={`shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors
+                ${produtoFilter === p
+                  ? 'bg-gray-800 text-white border-gray-800'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                }`}
+            >
+              {p === 'todos' ? 'Todos' : p === 'vinho' ? '🍷 Vinhos' : '☕ Cafés'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* List */}
@@ -65,7 +97,10 @@ export default function MovimentacoesPage() {
         <div className="space-y-2">
           {filtered.map((mov) => {
             const cfg   = TIPO_CONFIG[mov.tipo] ?? TIPO_CONFIG.ajuste;
-            const vinho = mov.vinhos;
+            const produtoNome = mov.produto_tipo === 'vinho'
+              ? (mov.vinhos?.nome ?? `Vinho #${mov.id}`)
+              : (mov.cafes?.nome ?? `Café #${mov.id}`);
+            const produtoEmoji = mov.produto_tipo === 'vinho' ? '🍷' : '☕';
             const data  = new Date(mov.created_at).toLocaleDateString('pt-BR', {
               day: '2-digit', month: '2-digit', year: 'numeric',
               hour: '2-digit', minute: '2-digit',
@@ -79,7 +114,7 @@ export default function MovimentacoesPage() {
 
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">
-                    {vinho?.nome ?? `Vinho #${mov.vinho_id}`}
+                    {produtoEmoji} {produtoNome}
                   </p>
                   <p className="text-xs text-gray-400">{mov.motivo ?? '—'} · {data}</p>
                 </div>
