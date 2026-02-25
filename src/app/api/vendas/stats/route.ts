@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const { data: vendas, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    type VendaItem = { id: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: { id: number; nome?: string } | null };
+    type VendaItem = { id?: number; quantidade?: number; preco_unitario?: number; subtotal?: number; vinhos?: { id: number; nome?: string } | null };
     type VendaRow = { id: number; data_venda?: string; valor_final?: number; forma_pagamento?: string; status?: string; itens_venda?: VendaItem[] };
     const lista: VendaRow[] = vendas ?? [];
 
