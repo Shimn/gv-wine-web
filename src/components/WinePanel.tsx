@@ -458,7 +458,9 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
       style={{ backdropFilter: 'blur(2px)' }}
     >
       {/* Drawer */}
-      <div className="w-full sm:w-[420px] sm:h-full bg-white rounded-t-2xl sm:rounded-none sm:rounded-l-2xl flex flex-col shadow-2xl max-h-[92vh] sm:max-h-full animate-slideUp sm:animate-slideLeft overflow-hidden">
+      <div className="w-full sm:w-[420px] sm:h-full bg-white rounded-t-2xl sm:rounded-none sm:rounded-l-2xl flex flex-col shadow-2xl max-h-[85vh] sm:max-h-full animate-slideUp sm:animate-slideLeft overflow-hidden"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
 
         {/* Header do painel */}
         <div className="bg-wine-50 px-5 pt-5 pb-0 border-b border-wine-100 shrink-0">
@@ -510,7 +512,7 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
         </div>
 
         {/* Conteúdo das abas */}
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-5 pb-20 sm:pb-5">
           {/* ABA INFO */}
           {activeTab === 'info' && vinho && (
             <div className="space-y-4">
