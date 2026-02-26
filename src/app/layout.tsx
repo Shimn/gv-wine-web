@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Sidebar from '@/components/Sidebar';
-import MobileNav from '@/components/MobileNav';
+import AppShell from '@/components/AppShell';
+import { AuthProvider } from '@/contexts/AuthContext';
+import AuthGuard from '@/components/AuthGuard';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,13 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={`${inter.className} bg-gray-50 text-gray-900`}>
-        <div className="flex h-[100dvh] overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-hidden flex flex-col pb-20 md:pb-0">
-            {children}
-          </main>
-        </div>
-        <MobileNav />
+        <AuthProvider>
+          <AuthGuard>
+            <AppShell>{children}</AppShell>
+          </AuthGuard>
+        </AuthProvider>
       </body>
     </html>
   );
