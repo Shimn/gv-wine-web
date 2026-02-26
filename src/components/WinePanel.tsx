@@ -485,8 +485,8 @@ export default function WinePanel({ vinho, mode, onClose, onSuccess, categorias,
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const qtd = vinho?.estoque?.[0]?.quantidade ?? 0;
-  const statusKey = qtd === 0 ? 'zero' : qtd < 5 ? 'low' : 'ok';
-  const statusLabel = qtd === 0 ? 'Sem estoque' : qtd < 5 ? 'Estoque baixo' : 'Em estoque';
+  const statusKey = qtd === 0 ? 'zero' : qtd <= 2 ? 'low' : 'ok';
+  const statusLabel = qtd === 0 ? 'Sem estoque' : qtd <= 2 ? 'Estoque baixo' : 'Em estoque';
 
   // Fechar ao clicar no overlay
   function handleOverlayClick(e: React.MouseEvent) {

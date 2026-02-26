@@ -119,13 +119,13 @@ export default function EstoquePage() {
   });
 
   const semEstoqueV   = baseFilteredV.filter((v) => getQtdVinho(v) === 0).length;
-  const baixoEstoqueV = baseFilteredV.filter((v) => { const q = getQtdVinho(v); return q > 0 && q < 5; }).length;
+  const baixoEstoqueV = baseFilteredV.filter((v) => { const q = getQtdVinho(v); return q > 0 && q <= 2; }).length;
 
   const filteredV = baseFilteredV.filter((v) => {
     if (stockFilter === 'todos') return true;
     const qtd = getQtdVinho(v);
     if (stockFilter === 'zerado') return qtd === 0;
-    if (stockFilter === 'baixo') return qtd > 0 && qtd < 5;
+    if (stockFilter === 'baixo') return qtd > 0 && qtd <= 2;
     return true;
   });
 

@@ -240,7 +240,7 @@ async function handleRetirarVinho(params: Record<string, string>): Promise<strin
   await supabase.from('movimentacoes_estoque').insert([{ vinho_id: v.id, tipo: 'saida', quantidade: qtdRetirar, motivo: 'Retirada via Web', usuario_id: WEB_USER_ID }]);
 
   const valorTotal = v.preco_venda ? (v.preco_venda * qtdRetirar).toFixed(2) : 'N/A';
-  const alerta = novaQtd === 0 ? '⚠️ ATENÇÃO: Estoque zerado!' : novaQtd < 5 ? '⚠️ Estoque baixo!' : '✅ Estoque OK';
+  const alerta = novaQtd === 0 ? '⚠️ ATENÇÃO: Estoque zerado!' : novaQtd <= 2 ? '⚠️ Estoque baixo!' : '✅ Estoque OK';
   return `✅ Retirada realizada!\n🍷 **${v.nome}**\n📤 Retirado: ${qtdRetirar} un.\n📦 Estoque: ${estoqueAtual} → ${novaQtd}\n💰 Valor total: R$ ${valorTotal}\n${alerta}`;
 }
 
@@ -271,7 +271,7 @@ async function handleAjustarEstoque(params: Record<string, string>): Promise<str
   await supabase.from('movimentacoes_estoque').insert([{ vinho_id: v.id, tipo: qtdAdicionar > 0 ? 'entrada' : 'saida', quantidade: Math.abs(qtdAdicionar), motivo: 'Ajuste via Web', usuario_id: WEB_USER_ID }]);
 
   const op = qtdAdicionar > 0 ? '📥 Adicionado' : '📤 Removido';
-  const alerta = novaQtd === 0 ? '⚠️ ATENÇÃO: Estoque zerado!' : novaQtd < 5 ? '⚠️ Estoque baixo!' : '✅ Estoque OK';
+  const alerta = novaQtd === 0 ? '⚠️ ATENÇÃO: Estoque zerado!' : novaQtd <= 2 ? '⚠️ Estoque baixo!' : '✅ Estoque OK';
   return `✅ Estoque ajustado!\n🍷 **${v.nome}**\n${op}: ${Math.abs(qtdAdicionar)} un.\n📦 Estoque: ${estoqueAtual} → ${novaQtd}\n${alerta}`;
 }
 
