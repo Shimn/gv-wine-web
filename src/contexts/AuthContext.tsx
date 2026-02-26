@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-import { supabaseBrowser } from '@/lib/supabase-browser';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import type { User as SupaUser, Session } from '@supabase/supabase-js';
 
 // ── Perfil do usuário armazenado na tabela `perfis` ──
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Busca perfil na tabela `perfis`
   const fetchPerfil = useCallback(async (uid: string) => {
-    const { data } = await supabaseBrowser
+    const { data } = await getSupabaseBrowser()
       .from('perfis')
       .select('*')
       .eq('id', uid)
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Session atual
-    supabaseBrowser.auth.getSession().then(({ data: { session: s } }) => {
+    getSupabaseBrowser().auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) fetchPerfil(s.user.id).finally(() => setLoading(false));
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Listener de mudança de auth
-    const { data: { subscription } } = supabaseBrowser.auth.onAuthStateChange(
+    const { data: { subscription } } = getSupabaseBrowser().auth.onAuthStateChange(
       (_event, s) => {
         setSession(s);
         setUser(s?.user ?? null);
@@ -74,13 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchPerfil]);
 
   async function signIn(email: string, password: string): Promise<string | null> {
-    const { error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+    const { error } = await getSupabaseBrowser().auth.signInWithPassword({ email, password });
     if (error) return error.message;
     return null;
   }
 
   async function signOut() {
-    await supabaseBrowser.auth.signOut();
+    await getSupabaseBrowser().auth.signOut();
     setPerfil(null);
   }
 
