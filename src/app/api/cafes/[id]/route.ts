@@ -43,10 +43,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
-// DELETE /api/cafes/[id] — remove café
+// DELETE /api/cafes/[id] — remove café e registros dependentes
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
+
+    // Remove registros dependentes antes de deletar o café
+    await supabase.from('movimentacoes_estoque_cafe').delete().eq('cafe_id', id);
+    await supabase.from('itens_venda').delete().eq('cafe_id', id);
+    await supabase.from('estoque_cafe').delete().eq('cafe_id', id);
+
     const { error } = await supabase.from('cafes').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ message: 'Café removido.' });

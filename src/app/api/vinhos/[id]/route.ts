@@ -45,10 +45,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
-// DELETE /api/vinhos/[id] — remove vinho
+// DELETE /api/vinhos/[id] — remove vinho e registros dependentes
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
+
+    // Remove registros dependentes antes de deletar o vinho
+    await supabase.from('movimentacoes_estoque').delete().eq('vinho_id', id);
+    await supabase.from('itens_venda').delete().eq('vinho_id', id);
+    await supabase.from('estoque').delete().eq('vinho_id', id);
+
     const { error } = await supabase.from('vinhos').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ message: 'Vinho removido.' });
