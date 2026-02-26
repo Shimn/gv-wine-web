@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const { signIn } = useAuth();
@@ -76,7 +77,10 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-wine-400 text-xs mt-6">
-          Acesso restrito a usuários autorizados
+          Não tem conta?{' '}
+          <Link href="/cadastro" className="text-wine-200 hover:text-white font-medium underline">
+            Cadastre-se
+          </Link>
         </p>
       </div>
     </div>

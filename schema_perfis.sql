@@ -72,4 +72,10 @@ CREATE POLICY "perfis_insert_admin"
 --    NEXT_PUBLIC_SUPABASE_URL=...
 --    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 --    SUPABASE_URL=...          (mesmo valor, para server-side)
---    SUPABASE_KEY=...          (service_role key, para admin.createUser)
+--    SUPABASE_KEY=...          (service_role key, para admin.createUser e cadastro)
+--
+-- FLUXO DE CADASTRO:
+--   - Usuário se cadastra em /cadastro
+--   - Conta é criada com ativo = false
+--   - Admin aprova em /usuarios (ativa a conta)
+--   - Usuário consegue acessar o sistema

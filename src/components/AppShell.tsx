@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 
-const SHELL_HIDDEN = ['/login'];
+const SHELL_HIDDEN = ['/login', '/cadastro'];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
