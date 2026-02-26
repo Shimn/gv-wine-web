@@ -144,9 +144,17 @@ export default function MovimentacoesPage() {
         <div className="space-y-2">
           {filtered.map((mov) => {
             const cfg   = TIPO_CONFIG[mov.tipo] ?? TIPO_CONFIG.ajuste;
-            const produtoNome = mov.produto_tipo === 'vinho'
-              ? (mov.vinhos?.nome ?? `Vinho #${mov.id}`)
-              : (mov.cafes?.nome ?? `Café #${mov.id}`);
+
+            // Se produto foi deletado (join nulo), tentar extrair nome do motivo
+            let produtoNome: string;
+            const joinNome = mov.produto_tipo === 'vinho' ? mov.vinhos?.nome : mov.cafes?.nome;
+            if (joinNome) {
+              produtoNome = joinNome;
+            } else {
+              const match = mov.motivo?.match(/\[(.+?)\]/) ?? mov.motivo?.match(/Produto removido.*: (.+)/);
+              produtoNome = match?.[1] ?? 'Produto removido';
+            }
+
             const produtoEmoji = mov.produto_tipo === 'vinho' ? '🍷' : '☕';
             const data  = new Date(mov.created_at).toLocaleDateString('pt-BR', {
               day: '2-digit', month: '2-digit', year: 'numeric',

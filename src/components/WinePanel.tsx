@@ -261,6 +261,8 @@ function TabEditar({
 }) {
   const isNew = mode === 'new';
 
+  const qtdAtual = vinho?.estoque?.[0]?.quantidade ?? 0;
+
   const [form, setForm] = useState({
     nome: vinho?.nome ?? '',
     safra: String(vinho?.safra ?? ''),
@@ -273,6 +275,7 @@ function TabEditar({
     notas_degustacao: vinho?.notas_degustacao ?? '',
     produtor_id: String(vinho?.produtores?.id ?? vinho?.produtor_id ?? ''),
     categoria_id: String(vinho?.categorias?.id ?? vinho?.categoria_id ?? ''),
+    quantidade: String(qtdAtual),
     estoque_inicial: '0',
   });
 
@@ -317,7 +320,9 @@ function TabEditar({
       notas_degustacao: form.notas_degustacao || null,
       produtor_id: form.produtor_id ? Number(form.produtor_id) : null,
       categoria_id: form.categoria_id ? Number(form.categoria_id) : null,
-      ...(isNew ? { estoque_inicial: Number(form.estoque_inicial) } : {}),
+      ...(isNew
+        ? { estoque_inicial: Number(form.estoque_inicial) }
+        : { quantidade: Number(form.quantidade) }),
     };
 
     try {
@@ -408,10 +413,18 @@ function TabEditar({
         <textarea rows={2} value={form.notas_degustacao} onChange={(e) => set('notas_degustacao', e.target.value)} className={inputCls + ' resize-none'} placeholder="Aromas, sabores, finalização..." />
       </div>
 
-      {isNew && (
+      {isNew ? (
         <div>
           <label className={labelCls}>Estoque inicial</label>
           <input type="number" min={0} value={form.estoque_inicial} onChange={(e) => set('estoque_inicial', e.target.value)} className={inputCls} />
+        </div>
+      ) : (
+        <div>
+          <label className={labelCls}>Quantidade em estoque</label>
+          <input type="number" min={0} value={form.quantidade} onChange={(e) => set('quantidade', e.target.value)} className={inputCls} />
+          {Number(form.quantidade) !== qtdAtual && (
+            <p className="text-xs text-amber-600 mt-1">⚠️ Estoque será ajustado de {qtdAtual} → {form.quantidade} (registrado no histórico)</p>
+          )}
         </div>
       )}
 

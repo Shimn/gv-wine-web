@@ -3,15 +3,16 @@ import { supabase } from '@/lib/supabase';
 
 interface Params { params: Promise<{ id: string }> }
 
-// PUT /api/vinhos/[id] — atualiza informações do vinho
+// PUT /api/vinhos/[id] — atualiza informações do vinho (e opcionalmente quantidade)
 export async function PUT(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
+    const numId = Number(id);
     const body = await req.json();
     const {
       nome, safra, tipo_uva, teor_alcoolico, volume_ml,
       preco_custo, preco_venda, descricao, notas_degustacao,
-      produtor_id, categoria_id,
+      produtor_id, categoria_id, quantidade,
     } = body;
 
     if (!nome || !preco_venda) {
@@ -34,28 +35,76 @@ export async function PUT(req: NextRequest, { params }: Params) {
         categoria_id: categoria_id || null,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', id)
+      .eq('id', numId)
       .select('id, nome')
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Se quantidade foi enviada, atualizar estoque e registrar movimentação
+    if (quantidade !== undefined && quantidade !== null) {
+      const novaQtd = Number(quantidade);
+      const { data: est } = await supabase.from('estoque').select('quantidade').eq('vinho_id', numId).single();
+      const qtdAnterior = est?.quantidade ?? 0;
+
+      if (novaQtd !== qtdAnterior) {
+        await supabase.from('estoque').update({ quantidade: novaQtd, updated_at: new Date().toISOString() }).eq('vinho_id', numId);
+        await supabase.from('movimentacoes_estoque').insert({
+          vinho_id: numId,
+          tipo: 'ajuste',
+          quantidade: Math.abs(novaQtd - qtdAnterior),
+          quantidade_anterior: qtdAnterior,
+          quantidade_nova: novaQtd,
+          motivo: `Ajuste manual via edição: ${qtdAnterior} → ${novaQtd}`,
+        });
+      }
+    }
+
     return NextResponse.json({ vinho: data, message: 'Vinho atualizado com sucesso.' });
   } catch {
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
   }
 }
 
-// DELETE /api/vinhos/[id] — remove vinho e registros dependentes
+// DELETE /api/vinhos/[id] — remove vinho, preserva histórico
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
+    const numId = Number(id);
 
-    // Remove registros dependentes antes de deletar o vinho
-    await supabase.from('movimentacoes_estoque').delete().eq('vinho_id', id);
-    await supabase.from('itens_venda').delete().eq('vinho_id', id);
-    await supabase.from('estoque').delete().eq('vinho_id', id);
+    // Buscar nome e quantidade atual antes de deletar
+    const { data: vinho } = await supabase.from('vinhos').select('nome').eq('id', numId).single();
+    const { data: est } = await supabase.from('estoque').select('quantidade').eq('vinho_id', numId).single();
+    const nomeVinho = vinho?.nome ?? `Vinho #${id}`;
+    const qtdAtual = est?.quantidade ?? 0;
 
-    const { error } = await supabase.from('vinhos').delete().eq('id', id);
+    // Atualizar motivo nas movimentações existentes para preservar o nome do produto
+    await supabase
+      .from('movimentacoes_estoque')
+      .update({ vinho_id: null, motivo: `[${nomeVinho}] ` })
+      .eq('vinho_id', numId)
+      .is('motivo', null);
+    await supabase
+      .from('movimentacoes_estoque')
+      .update({ vinho_id: null })
+      .eq('vinho_id', numId);
+
+    // Registrar movimentação de remoção
+    await supabase.from('movimentacoes_estoque').insert({
+      vinho_id: null,
+      tipo: 'saida',
+      quantidade: qtdAtual,
+      quantidade_anterior: qtdAtual,
+      quantidade_nova: 0,
+      motivo: `Produto removido do sistema: ${nomeVinho}`,
+    });
+
+    // Nullificar FKs em itens_venda
+    await supabase.from('itens_venda').update({ vinho_id: null }).eq('vinho_id', numId);
+
+    // Deletar registro de estoque e o produto
+    await supabase.from('estoque').delete().eq('vinho_id', numId);
+    const { error } = await supabase.from('vinhos').delete().eq('id', numId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ message: 'Vinho removido.' });
   } catch {

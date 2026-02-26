@@ -255,6 +255,8 @@ function TabEditar({
 }) {
   const isNew = mode === 'new';
 
+  const qtdAtual = cafe?.estoque_cafe?.[0]?.quantidade ?? 0;
+
   const [form, setForm] = useState({
     nome: cafe?.nome ?? '',
     tipo_grao: cafe?.tipo_grao ?? '',
@@ -266,6 +268,7 @@ function TabEditar({
     preco_venda: String(cafe?.preco_venda ?? ''),
     descricao: cafe?.descricao ?? '',
     notas_degustacao: cafe?.notas_degustacao ?? '',
+    quantidade: String(qtdAtual),
     estoque_inicial: '0',
   });
 
@@ -309,7 +312,9 @@ function TabEditar({
       preco_venda: Number(form.preco_venda),
       descricao: form.descricao || null,
       notas_degustacao: form.notas_degustacao || null,
-      ...(isNew ? { estoque_inicial: Number(form.estoque_inicial) } : {}),
+      ...(isNew
+        ? { estoque_inicial: Number(form.estoque_inicial) }
+        : { quantidade: Number(form.quantidade) }),
     };
 
     try {
@@ -405,10 +410,18 @@ function TabEditar({
         <textarea rows={2} value={form.notas_degustacao} onChange={(e) => set('notas_degustacao', e.target.value)} className={inputCls + ' resize-none'} placeholder="Aromas, acidez, corpo, finalização..." />
       </div>
 
-      {isNew && (
+      {isNew ? (
         <div>
           <label className={labelCls}>Estoque inicial</label>
           <input type="number" min={0} value={form.estoque_inicial} onChange={(e) => set('estoque_inicial', e.target.value)} className={inputCls} />
+        </div>
+      ) : (
+        <div>
+          <label className={labelCls}>Quantidade em estoque</label>
+          <input type="number" min={0} value={form.quantidade} onChange={(e) => set('quantidade', e.target.value)} className={inputCls} />
+          {Number(form.quantidade) !== qtdAtual && (
+            <p className="text-xs text-amber-600 mt-1">⚠️ Estoque será ajustado de {qtdAtual} → {form.quantidade} (registrado no histórico)</p>
+          )}
         </div>
       )}
 
