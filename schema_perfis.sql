@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS perfis (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   nome TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'vendedor' CHECK (role IN ('admin', 'vendedor', 'viewer')),
+  role TEXT NOT NULL DEFAULT 'vendedor' CHECK (role IN ('dono', 'admin', 'vendedor', 'viewer')),
   ativo BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

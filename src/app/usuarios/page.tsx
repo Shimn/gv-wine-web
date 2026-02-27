@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth, type Perfil } from '@/contexts/AuthContext';
 
 const ROLE_CFG: Record<string, { label: string; color: string }> = {
+  dono:     { label: 'Dono',     color: 'bg-amber-100 text-amber-800' },
   admin:    { label: 'Admin',    color: 'bg-purple-100 text-purple-700' },
   vendedor: { label: 'Vendedor', color: 'bg-blue-100 text-blue-700' },
   viewer:   { label: 'Viewer',   color: 'bg-gray-100 text-gray-600' },
@@ -74,7 +75,7 @@ export default function UsuariosPage() {
     fetchUsuarios();
   }
 
-  const isAdmin = meuPerfil?.role === 'admin';
+  const isAdmin = meuPerfil?.role === 'admin' || meuPerfil?.role === 'dono';
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -128,6 +129,7 @@ export default function UsuariosPage() {
                 >
                   <option value="vendedor">Vendedor</option>
                   <option value="admin">Admin</option>
+                  {meuPerfil?.role === 'dono' && <option value="dono">Dono</option>}
                   <option value="viewer">Viewer</option>
                 </select>
               </div>
@@ -191,6 +193,7 @@ export default function UsuariosPage() {
                       onChange={(e) => setEditRole(e.target.value)}
                       className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none"
                     >
+                      {meuPerfil?.role === 'dono' && <option value="dono">Dono</option>}
                       <option value="admin">Admin</option>
                       <option value="vendedor">Vendedor</option>
                       <option value="viewer">Viewer</option>

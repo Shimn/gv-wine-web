@@ -9,7 +9,7 @@ export interface Perfil {
   id: string;            // = auth.users.id (UUID)
   email: string;
   nome: string;
-  role: 'admin' | 'vendedor' | 'viewer';
+  role: 'dono' | 'admin' | 'vendedor' | 'viewer';
   ativo: boolean;
   created_at?: string;
 }

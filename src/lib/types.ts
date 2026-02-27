@@ -9,7 +9,7 @@ export interface User {
   username?: string;
   first_name?: string;
   last_name?: string;
-  role?: 'admin' | 'vendedor' | 'cliente';
+  role?: 'dono' | 'admin' | 'vendedor' | 'cliente';
   created_at?: string;
   updated_at?: string;
 }
