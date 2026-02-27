@@ -130,6 +130,7 @@ export default function EstoquePage() {
   });
 
   const totalUnidadesV = filteredV.reduce((s, v) => s + getQtdVinho(v), 0);
+  const valorTotalV = baseFilteredV.reduce((s, v) => s + getQtdVinho(v) * (v.preco_venda ?? 0), 0);
 
   // ───────── CAFÉS: filtros ─────────
   const torrasLista = ['Todas', ...Array.from(new Set(
@@ -156,6 +157,7 @@ export default function EstoquePage() {
   });
 
   const totalUnidadesC = filteredC.reduce((s, c) => s + getQtdCafe(c), 0);
+  const valorTotalC = baseFilteredC.reduce((s, c) => s + getQtdCafe(c) * (c.preco_venda ?? 0), 0);
 
   // ── Variáveis dinâmicas por aba ──
   const isVinho = productTab === 'vinhos';
@@ -164,6 +166,7 @@ export default function EstoquePage() {
   const totalUnidades = isVinho ? totalUnidadesV : totalUnidadesC;
   const semEstoque = isVinho ? semEstoqueV : semEstoqueC;
   const baixoEstoque = isVinho ? baixoEstoqueV : baixoEstoqueC;
+  const valorTotal = isVinho ? valorTotalV : valorTotalC;
   const filterList = isVinho ? categoriasLista : torrasLista;
 
   return (
@@ -223,6 +226,10 @@ export default function EstoquePage() {
           <div className="bg-gray-50 rounded-lg px-3 py-2">
             <p className="text-gray-500">Unidades</p>
             <p className="font-bold text-gray-800">{totalUnidades}</p>
+          </div>
+          <div className={`rounded-lg px-3 py-2 ${isVinho ? 'bg-green-50' : 'bg-green-50'}`}>
+            <p className="text-gray-500">Valor total</p>
+            <p className="font-bold text-green-700">R$ {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
           </div>
           {semEstoque > 0 && (
             <div
