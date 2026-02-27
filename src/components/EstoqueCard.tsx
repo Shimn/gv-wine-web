@@ -57,12 +57,16 @@ export default function EstoqueCard({ vinho, onClick }: EstoqueCardProps) {
         </div>
       </div>
 
-      {/* Preço de venda */}
+      {/* Preço de venda + valor total */}
       <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
-        <span className="text-xs text-gray-400">Preço venda</span>
-        <span className="font-semibold text-wine-700 text-sm">
-          R$ {vinho.preco_venda.toFixed(2)}
-        </span>
+        <div>
+          <span className="text-xs text-gray-400">Preço venda</span>
+          <p className="font-semibold text-wine-700 text-sm">R$ {vinho.preco_venda.toFixed(2)}</p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-gray-400">Valor total</span>
+          <p className="font-semibold text-green-700 text-sm">R$ {(qtd * vinho.preco_venda).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+        </div>
       </div>
 
       {/* Hint de ação — só aparece quando o card é clicável */}
