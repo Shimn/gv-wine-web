@@ -253,15 +253,26 @@ export default function EstoquePage() {
 
         {/* Filtros */}
         <div className="mt-3 flex gap-2">
-          <input
-            type="text"
-            placeholder={isVinho ? 'Buscar vinho ou produtor...' : 'Buscar café ou origem...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none ${
-              isVinho ? 'focus:border-wine-400' : 'focus:border-amber-400'
-            }`}
-          />
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder={isVinho ? 'Buscar vinho ou produtor...' : 'Buscar café ou origem...'}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 pr-8 focus:outline-none ${
+                isVinho ? 'focus:border-wine-400' : 'focus:border-amber-400'
+              }`}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Limpar busca"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
