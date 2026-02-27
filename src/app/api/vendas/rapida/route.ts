@@ -4,17 +4,20 @@ import { supabase } from '@/lib/supabase';
 // POST /api/vendas/rapida — registra uma venda rápida de 1 vinho
 export async function POST(req: NextRequest) {
   try {
+    const body = await req.json();
     const {
       vinho_id,
       quantidade,
-      preco_unitario,
+      preco_unitario = 0,
       forma_pagamento = 'dinheiro',
       cliente_nome,
       desconto = 0,
       observacoes,
-    } = await req.json();
+    } = body;
 
-    if (!vinho_id || !quantidade || !preco_unitario) {
+    const isBrinde = body.brinde === true;
+
+    if (!vinho_id || !quantidade || (!isBrinde && !preco_unitario)) {
       return NextResponse.json({ error: 'vinho_id, quantidade e preco_unitario são obrigatórios.' }, { status: 400 });
     }
 

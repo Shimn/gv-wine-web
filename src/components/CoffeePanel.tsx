@@ -102,6 +102,7 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
   const qtdDisponivel = cafe.estoque_cafe?.[0]?.quantidade ?? 0;
   const [qtd, setQtd] = useState(1);
   const [preco, setPreco] = useState(cafe.preco_venda);
+  const [brinde, setBrinde] = useState(false);
   const [forma, setForma] = useState<string>('dinheiro');
   const [clienteNome, setClienteNome] = useState('');
   const [desconto, setDesconto] = useState(0);
@@ -113,7 +114,7 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
   const total = Math.max(0, subtotal - desconto);
 
   async function submit() {
-    if (qtd <= 0 || preco <= 0) return;
+    if (qtd <= 0 || (!brinde && preco <= 0)) return;
     setLoading(true);
     setMsg(null);
     try {
@@ -123,11 +124,12 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
         body: JSON.stringify({
           cafe_id: cafe.id,
           quantidade: qtd,
-          preco_unitario: preco,
+          preco_unitario: brinde ? 0 : preco,
           forma_pagamento: forma,
           cliente_nome: clienteNome || undefined,
-          desconto,
-          observacoes: obs || undefined,
+          desconto: brinde ? 0 : desconto,
+          observacoes: brinde ? `🎁 Brinde${obs ? ` — ${obs}` : ''}` : (obs || undefined),
+          brinde,
         }),
       });
       const d = await r.json();
@@ -147,6 +149,16 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
         </div>
       )}
 
+      {/* Toggle brinde */}
+      <label className="flex items-center gap-2 cursor-pointer select-none">
+        <input
+          type="checkbox" checked={brinde}
+          onChange={(e) => { setBrinde(e.target.checked); if (e.target.checked) { setPreco(0); setDesconto(0); } else { setPreco(cafe.preco_venda); } }}
+          className="w-4 h-4 accent-amber-700 rounded"
+        />
+        <span className="text-sm text-gray-700">🎁 Marcar como brinde (valor R$ 0,00)</span>
+      </label>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Quantidade *</label>
@@ -158,11 +170,12 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
           <p className="text-[10px] text-gray-400 mt-0.5">Disponível: {qtdDisponivel}</p>
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Preço unitário *</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Preço unitário {brinde ? '' : '*'}</label>
           <input
-            type="number" min={0} step={0.01} value={preco}
+            type="number" min={0} step={0.01} value={brinde ? 0 : preco}
             onChange={(e) => setPreco(Number(e.target.value))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
+            disabled={brinde}
+            className={`w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 ${brinde ? 'bg-gray-100 text-gray-400' : ''}`}
           />
         </div>
       </div>
@@ -234,7 +247,7 @@ function TabVenda({ cafe, onSuccess, onClose }: { cafe: Cafe; onSuccess: () => v
           Cancelar
         </button>
         <button
-          onClick={submit} disabled={loading || qtd <= 0 || preco <= 0 || qtdDisponivel < qtd}
+          onClick={submit} disabled={loading || qtd <= 0 || (!brinde && preco <= 0) || qtdDisponivel < qtd}
           className="flex-1 bg-amber-700 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-amber-800 transition-colors disabled:opacity-50"
         >
           {loading ? 'Salvando…' : 'Registrar venda'}
