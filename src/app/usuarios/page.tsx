@@ -169,7 +169,8 @@ export default function UsuariosPage() {
             const isMe = u.id === meuPerfil?.id;
 
             return (
-              <div key={u.id} className={`bg-white border rounded-xl px-4 py-3 flex items-center gap-3 ${u.ativo ? 'border-gray-100' : 'border-red-100 opacity-60'}`}>
+              <div key={u.id} className={`bg-white border rounded-xl px-4 py-3 ${u.ativo ? 'border-gray-100' : 'border-red-100 opacity-60'}`}>
+                <div className="flex items-center gap-3">
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-wine-100 text-wine-700 flex items-center justify-center text-sm font-bold shrink-0">
                   {u.nome.charAt(0).toUpperCase()}
@@ -180,7 +181,7 @@ export default function UsuariosPage() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-gray-800 truncate">{u.nome}</p>
                     {isMe && <span className="text-[10px] bg-wine-50 text-wine-600 rounded-full px-1.5 py-0.5">Você</span>}
-                    {!u.ativo && <span className="text-[10px] bg-red-50 text-red-500 rounded-full px-1.5 py-0.5">Inativo</span>}
+                    {!u.ativo && <span className="text-[10px] bg-red-50 text-red-500 rounded-full px-1.5 py-0.5">Pendente</span>}
                   </div>
                   <p className="text-xs text-gray-400 truncate">{u.email}</p>
                 </div>
@@ -217,22 +218,35 @@ export default function UsuariosPage() {
                       {cfg.label}
                     </span>
                     {isAdmin && !isMe && (
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => { setEditingId(u.id); setEditRole(u.role); }}
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          title="Editar papel"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleToggleAtivo(u.id, !u.ativo)}
-                          className="text-[10px] text-gray-400 hover:text-gray-600"
-                          title={u.ativo ? 'Desativar' : 'Reativar'}
-                        >
-                          {u.ativo ? '🚫' : '✅'}
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => { setEditingId(u.id); setEditRole(u.role); }}
+                        className="text-[10px] text-gray-400 hover:text-gray-600"
+                        title="Editar papel"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </div>
+                )}
+                </div>
+
+                {/* Botões de aprovação / remoção — só para admin/dono, nunca para si mesmo */}
+                {isAdmin && !isMe && (
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-gray-50">
+                    {!u.ativo ? (
+                      <button
+                        onClick={() => handleToggleAtivo(u.id, true)}
+                        className="flex-1 flex items-center justify-center gap-1 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg py-1.5 transition-colors"
+                      >
+                        ✅ Aprovar acesso
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleToggleAtivo(u.id, false)}
+                        className="flex-1 flex items-center justify-center gap-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg py-1.5 transition-colors"
+                      >
+                        🚫 Remover acesso
+                      </button>
                     )}
                   </div>
                 )}
